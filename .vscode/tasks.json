@@ -1,0 +1,55 @@
+{
+	// See https://go.microsoft.com/fwlink/?LinkId=733558
+	// for the documentation about the tasks.json format
+	"version": "2.0.0",
+	"tasks": [
+        {
+            "label": "BUILD",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "type": "shell",
+            "command": "cd build; mingw32-make; sleep 0.1",
+            "problemMatcher": []
+        },
+
+
+        {
+            "label": "LAUNCH",
+            "group": "test",
+            "presentation": {
+                "echo": false,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "type": "shell",
+            "command": "./build/main.exe",
+            "problemMatcher": []
+        },   		
+		{
+            "label": "echo",
+            "group":"none",
+			"type": "shell",
+			"command": "echo Hello"
+        },
+        
+        {
+            "label": "Build and Launch Test 1",
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "silent",
+                "focus": true,
+                "panel": "shared"
+            },
+            "type": "shell",
+            "command": "g++ ./src/test1.cpp ./src/glad.c -L./lib -I./inc -lglfw3 -lgdi32 -o test1; ./test1.exe",
+            "problemMatcher": []
+        },          
+	]
+}
