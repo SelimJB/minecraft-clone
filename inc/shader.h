@@ -10,13 +10,12 @@
 class Shader
 {
 public:
-	// the program ID
+	// program ID
 	unsigned int Program;
-	// constructor reads and builds the shader
+	// reads and builds the shader
 	Shader(const GLchar *vertexPath, const GLchar *fragmentPath);
 	// use/activate the shader
 	void use();
-	// utility uniform functions
 	void setBool(const std::string &name, bool value) const;
 	void setInt(const std::string &name, int value) const;
 	void setFloat(const std::string &name, float value) const;
@@ -26,16 +25,13 @@ public:
 	void setMat3(const std::string &name, const glm::mat3 &mat) const;
 	void setMat4(const std::string &name, const glm::mat4 &mat) const;
 };
-#endif
 
 Shader::Shader(const char *vertexPath, const char *fragmentPath)
 {
-	// 1. retrieve the vertex/fragment source code from filePath
 	std::string vertexCode;
 	std::string fragmentCode;
 	std::ifstream vShaderFile;
 	std::ifstream fShaderFile;
-	// ensure ifstream objects can throw exceptions:
 	vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
 	try
@@ -61,7 +57,6 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
 	const char *vShaderCode = vertexCode.c_str();
 	const char *fShaderCode = fragmentCode.c_str();
 
-	// 2. compile shaders
 	unsigned int vertex, fragment;
 	int success;
 	char infoLog[512];
@@ -69,7 +64,7 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
 	vertex = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertex, 1, &vShaderCode, NULL);
 	glCompileShader(vertex);
-	// print compile errors if any
+	// compile errors
 	glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
@@ -82,7 +77,6 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
 	fragment = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment, 1, &fShaderCode, NULL);
 	glCompileShader(fragment);
-	// print compile errors if any
 	glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
 	if (!success)
 	{
@@ -95,7 +89,7 @@ Shader::Shader(const char *vertexPath, const char *fragmentPath)
 	glAttachShader(Program, vertex);
 	glAttachShader(Program, fragment);
 	glLinkProgram(Program);
-	// print linking errors if any
+	// linking errors
 	glGetProgramiv(Program, GL_LINK_STATUS, &success);
 	if (!success)
 	{
@@ -140,13 +134,14 @@ void Shader::setMat2(const std::string &name, const glm::mat2 &mat) const
 {
 	glUniformMatrix2fv(glGetUniformLocation(Program, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
-// ------------------------------------------------------------------------
+
 void Shader::setMat3(const std::string &name, const glm::mat3 &mat) const
 {
 	glUniformMatrix3fv(glGetUniformLocation(Program, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
-// ------------------------------------------------------------------------
+
 void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const
 {
 	glUniformMatrix4fv(glGetUniformLocation(Program, name.c_str()), 1, GL_FALSE, &mat[0][0]);
 }
+#endif

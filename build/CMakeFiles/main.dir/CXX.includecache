@@ -58,6 +58,22 @@ inttypes.h
 stdint.h
 -
 
+.././inc/camera.h
+glad/glad.h
+-
+glm/glm.hpp
+-
+glm/gtc/matrix_transform.hpp
+-
+vector
+-
+
+.././inc/freetype/config/ftheader.h
+
+.././inc/ft2build.h
+freetype/config/ftheader.h
+-
+
 .././inc/glad/glad.h
 KHR/khrplatform.h
 -
@@ -1504,7 +1520,13 @@ intrin.h
 arm_neon.h
 -
 
+.././inc/textrenderer.h
+iostream
+-
+
 C:/Users/selim/Projet/0_Projets/Minecraft clone/src/main.cpp
+map
+-
 glm/glm.hpp
 -
 glm/gtc/matrix_transform.hpp
@@ -1517,8 +1539,14 @@ GLFW/glfw3.h
 -
 iostream
 -
+camera.h
+C:/Users/selim/Projet/0_Projets/Minecraft clone/src/camera.h
 shader.h
 C:/Users/selim/Projet/0_Projets/Minecraft clone/src/shader.h
 stb_image.h
 C:/Users/selim/Projet/0_Projets/Minecraft clone/src/stb_image.h
+ft2build.h
+-
+textrenderer.h
+C:/Users/selim/Projet/0_Projets/Minecraft clone/src/textrenderer.h
 

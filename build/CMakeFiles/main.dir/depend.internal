@@ -8,6 +8,9 @@ CMakeFiles/main.dir/src/glad.c.obj
 CMakeFiles/main.dir/src/main.cpp.obj
  .././inc/GLFW/glfw3.h
  .././inc/KHR/khrplatform.h
+ .././inc/camera.h
+ .././inc/freetype/config/ftheader.h
+ .././inc/ft2build.h
  .././inc/glad/glad.h
  .././inc/glm/./detail/setup.hpp
  .././inc/glm/./detail/type_mat2x2.hpp
@@ -212,4 +215,8 @@ CMakeFiles/main.dir/src/main.cpp.obj
  .././inc/glm/vector_relational.hpp
  .././inc/shader.h
  .././inc/stb_image.h
+ .././inc/textrenderer.h
  C:/Users/selim/Projet/0_Projets/Minecraft clone/src/main.cpp
+CMakeFiles/main.dir/src/textrenderer.cpp.obj
+ .././inc/textrenderer.h
+ C:/Users/selim/Projet/0_Projets/Minecraft clone/src/textrenderer.cpp

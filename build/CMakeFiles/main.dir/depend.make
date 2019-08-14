@@ -7,6 +7,9 @@ CMakeFiles/main.dir/src/glad.c.obj: ../src/glad.c
 
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/GLFW/glfw3.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/KHR/khrplatform.h
+CMakeFiles/main.dir/src/main.cpp.obj: .././inc/camera.h
+CMakeFiles/main.dir/src/main.cpp.obj: .././inc/freetype/config/ftheader.h
+CMakeFiles/main.dir/src/main.cpp.obj: .././inc/ft2build.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glad/glad.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/./detail/setup.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/./detail/type_mat2x2.hpp
@@ -211,5 +214,9 @@ CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/vec4.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/vector_relational.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/shader.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/stb_image.h
+CMakeFiles/main.dir/src/main.cpp.obj: .././inc/textrenderer.h
 CMakeFiles/main.dir/src/main.cpp.obj: ../src/main.cpp
+
+CMakeFiles/main.dir/src/textrenderer.cpp.obj: .././inc/textrenderer.h
+CMakeFiles/main.dir/src/textrenderer.cpp.obj: ../src/textrenderer.cpp
 

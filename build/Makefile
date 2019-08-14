@@ -573,6 +573,33 @@ src/main.cpp.s:
 	$(MAKE) -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/textrenderer.obj: src/textrenderer.cpp.obj
+
+.PHONY : src/textrenderer.obj
+
+# target to build an object file
+src/textrenderer.cpp.obj:
+	$(MAKE) -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/src/textrenderer.cpp.obj
+.PHONY : src/textrenderer.cpp.obj
+
+src/textrenderer.i: src/textrenderer.cpp.i
+
+.PHONY : src/textrenderer.i
+
+# target to preprocess a source file
+src/textrenderer.cpp.i:
+	$(MAKE) -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/src/textrenderer.cpp.i
+.PHONY : src/textrenderer.cpp.i
+
+src/textrenderer.s: src/textrenderer.cpp.s
+
+.PHONY : src/textrenderer.s
+
+# target to generate assembly for a file
+src/textrenderer.cpp.s:
+	$(MAKE) -f CMakeFiles\main.dir\build.make CMakeFiles/main.dir/src/textrenderer.cpp.s
+.PHONY : src/textrenderer.cpp.s
+
 # Help Target
 help:
 	@echo The following are some of the valid targets for this Makefile:
@@ -619,6 +646,9 @@ help:
 	@echo ... src/main.obj
 	@echo ... src/main.i
 	@echo ... src/main.s
+	@echo ... src/textrenderer.obj
+	@echo ... src/textrenderer.i
+	@echo ... src/textrenderer.s
 .PHONY : help
 
 

@@ -3,13 +3,13 @@
 
 # compile C with C:/MinGW/bin/gcc.exe
 # compile CXX with C:/MinGW/bin/g++.exe
-C_FLAGS =  
+C_FLAGS = -g  
 
 C_DEFINES = 
 
 C_INCLUDES = @CMakeFiles/main.dir/includes_C.rsp
 
-CXX_FLAGS =  
+CXX_FLAGS = -g  
 
 CXX_DEFINES = 
 

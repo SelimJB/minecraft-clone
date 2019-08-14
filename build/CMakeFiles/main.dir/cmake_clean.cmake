@@ -1,6 +1,7 @@
 file(REMOVE_RECURSE
   "CMakeFiles/main.dir/src/main.cpp.obj"
   "CMakeFiles/main.dir/src/glad.c.obj"
+  "CMakeFiles/main.dir/src/textrenderer.cpp.obj"
   "main.pdb"
   "main.exe"
   "main.exe.manifest"

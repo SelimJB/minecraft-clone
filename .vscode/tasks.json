@@ -48,7 +48,7 @@
                 "panel": "shared"
             },
             "type": "shell",
-            "command": "g++ ./src/test1.cpp ./src/glad.c -L./lib -I./inc -lglfw3 -lgdi32 -o test1; ./test1.exe",
+            "command": "g++ ./src/test1.cpp ./src/glad.c -L./lib -I./inc -lglfw3 -lgdi32 -lfreetype -o test1; ./test1.exe",
             "problemMatcher": []
         },          
 	]
