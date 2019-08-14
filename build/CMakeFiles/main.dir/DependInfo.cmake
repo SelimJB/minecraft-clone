@@ -15,6 +15,7 @@ set(CMAKE_C_TARGET_INCLUDE_PATH
   )
 set(CMAKE_DEPENDS_CHECK_CXX
   "C:/Users/selim/Projet/0_Projets/Minecraft clone/src/main.cpp" "C:/Users/selim/Projet/0_Projets/Minecraft clone/build/CMakeFiles/main.dir/src/main.cpp.obj"
+  "C:/Users/selim/Projet/0_Projets/Minecraft clone/src/shader.cpp" "C:/Users/selim/Projet/0_Projets/Minecraft clone/build/CMakeFiles/main.dir/src/shader.cpp.obj"
   "C:/Users/selim/Projet/0_Projets/Minecraft clone/src/textrenderer.cpp" "C:/Users/selim/Projet/0_Projets/Minecraft clone/build/CMakeFiles/main.dir/src/textrenderer.cpp.obj"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")

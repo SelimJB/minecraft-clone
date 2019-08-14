@@ -12,6 +12,7 @@ set(SRCS
 ./src/main.cpp
 ./src/glad.c
 ./src/textrenderer.cpp
+./src/shader.cpp
     )
     
 set(HEADERS
