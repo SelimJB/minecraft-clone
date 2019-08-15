@@ -3,6 +3,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/main.dir/src/glad.c.obj"
   "CMakeFiles/main.dir/src/textrenderer.cpp.obj"
   "CMakeFiles/main.dir/src/shader.cpp.obj"
+  "CMakeFiles/main.dir/src/camera.cpp.obj"
+  "CMakeFiles/main.dir/src/windowmanager.cpp.obj"
   "main.pdb"
   "main.exe"
   "main.exe.manifest"

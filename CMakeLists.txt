@@ -13,6 +13,8 @@ set(SRCS
 ./src/glad.c
 ./src/textrenderer.cpp
 ./src/shader.cpp
+./src/camera.cpp
+./src/windowmanager.cpp
     )
     
 set(HEADERS
