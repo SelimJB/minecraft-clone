@@ -1474,6 +1474,14 @@ detail/setup.hpp
 detail/func_vector_relational.inl
 .././inc/glm/detail/func_vector_relational.inl
 
+.././inc/scenes.h
+camera.h
+.././inc/camera.h
+shader.h
+.././inc/shader.h
+windowmanager.h
+.././inc/windowmanager.h
+
 .././inc/shader.h
 glad/glad.h
 -
@@ -1563,4 +1571,6 @@ windowmanager.h
 C:/Users/selim/Projet/0_Projets/Minecraft clone/src/windowmanager.h
 vertices.h
 C:/Users/selim/Projet/0_Projets/Minecraft clone/src/vertices.h
+scenes.h
+C:/Users/selim/Projet/0_Projets/Minecraft clone/src/scenes.h
 

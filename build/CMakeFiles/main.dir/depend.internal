@@ -383,6 +383,7 @@ CMakeFiles/main.dir/src/main.cpp.obj
  .././inc/glm/vec3.hpp
  .././inc/glm/vec4.hpp
  .././inc/glm/vector_relational.hpp
+ .././inc/scenes.h
  .././inc/shader.h
  .././inc/stb_image.h
  .././inc/textrenderer.h

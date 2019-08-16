@@ -382,6 +382,7 @@ CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/vec2.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/vec3.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/vec4.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/vector_relational.hpp
+CMakeFiles/main.dir/src/main.cpp.obj: .././inc/scenes.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/shader.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/stb_image.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/textrenderer.h
