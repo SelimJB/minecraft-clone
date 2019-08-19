@@ -182,7 +182,6 @@ CMakeFiles/main.dir/src/main.cpp.obj
  .././inc/freetype/config/ftheader.h
  .././inc/ft2build.h
  .././inc/glad/glad.h
- .././inc/glm/./detail/setup.hpp
  .././inc/glm/./detail/type_mat2x2.hpp
  .././inc/glm/./detail/type_mat2x2.inl
  .././inc/glm/./detail/type_mat2x3.hpp
@@ -267,6 +266,7 @@ CMakeFiles/main.dir/src/main.cpp.obj
  .././inc/glm/common.hpp
  .././inc/glm/detail/./compute_vector_relational.hpp
  .././inc/glm/detail/_fixes.hpp
+ .././inc/glm/detail/_noise.hpp
  .././inc/glm/detail/_swizzle.hpp
  .././inc/glm/detail/_swizzle_func.hpp
  .././inc/glm/detail/_vectorize.hpp
@@ -354,6 +354,8 @@ CMakeFiles/main.dir/src/main.cpp.obj
  .././inc/glm/gtc/epsilon.inl
  .././inc/glm/gtc/matrix_transform.hpp
  .././inc/glm/gtc/matrix_transform.inl
+ .././inc/glm/gtc/noise.hpp
+ .././inc/glm/gtc/noise.inl
  .././inc/glm/gtc/quaternion.hpp
  .././inc/glm/gtc/quaternion.inl
  .././inc/glm/gtc/quaternion_simd.inl

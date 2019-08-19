@@ -181,7 +181,6 @@ CMakeFiles/main.dir/src/main.cpp.obj: .././inc/camera.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/freetype/config/ftheader.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/ft2build.h
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glad/glad.h
-CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/./detail/setup.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/./detail/type_mat2x2.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/./detail/type_mat2x2.inl
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/./detail/type_mat2x3.hpp
@@ -266,6 +265,7 @@ CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/./ext/vector_uint4_precision.
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/common.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/detail/./compute_vector_relational.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/detail/_fixes.hpp
+CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/detail/_noise.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/detail/_swizzle.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/detail/_swizzle_func.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/detail/_vectorize.hpp
@@ -353,6 +353,8 @@ CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/gtc/epsilon.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/gtc/epsilon.inl
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/gtc/matrix_transform.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/gtc/matrix_transform.inl
+CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/gtc/noise.hpp
+CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/gtc/noise.inl
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/gtc/quaternion.hpp
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/gtc/quaternion.inl
 CMakeFiles/main.dir/src/main.cpp.obj: .././inc/glm/gtc/quaternion_simd.inl

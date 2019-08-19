@@ -5,13 +5,14 @@ using namespace std;
 
 extern GLuint VAOs[], VBOs[];
 
+extern int vertexNbr;
 
 void drawText(TextRenderer &textRenderer, WindowManager &window)
 {
 	textRenderer.RenderText("Framerate : " + to_string(window.AverageFrameRate()), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+	textRenderer.RenderText("Vrt nbr  :  " + to_string(vertexNbr), 35.0f, 70.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 	textRenderer.RenderText("No mipmap, 2 textures, no culling", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
 }
-
 
 void twoTextures_noMipMap_noCulling_rotation(Shader &ourShader, Camera &camera, WindowManager &window, unsigned int texture, unsigned int texture2)
 {
@@ -145,12 +146,14 @@ void testMipMap(Shader &ourShader, Camera &camera, WindowManager &window, unsign
 	glm::mat4 view = camera.GetViewMatrix();
 	ourShader.setMat4("view", view);
 	glBindVertexArray(VAOs[0]);
-	for (int i = 0; i < 50; i++)
+	for (int i = 0; i < 2; i++)
 	{
-		for (int j = 0; j < 250; j++)
+		for (int j = 0; j < 3; j++)
 		{
 			glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-			model = glm::translate(model, glm::vec3(i - 25, 0, j - 50));
+			model = glm::translate(model, glm::vec3(i, 0, j));
+			// model = glm::translate(model, glm::vec3(i - 25, 0, j - 50));
+
 			// model = glm::rotate(model, glm::radians(20.0f * (i % 10)) * (float)glfwGetTime(), glm::vec3(1.0f, 0.3f, 0.1f * (i % 10)));
 			if ((i + j) % 2 == 0)
 			{
@@ -172,8 +175,6 @@ void draw3D(Shader &ourShader, Camera &camera, WindowManager &window, unsigned i
 	testMipMap(ourShader, camera, window, texture, texture2); // 45
 }
 
-
-
 unsigned int buildTexture(const char *texturePath)
 {
 	unsigned int texture;
@@ -184,8 +185,9 @@ unsigned int buildTexture(const char *texturePath)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	// Texture filtering
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	std::cout << "toto" << std::endl;
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	// load and generate the texture
 	int width, height, nrChannels;
 	unsigned char *data = stbi_load(texturePath, &width, &height, &nrChannels, 0);

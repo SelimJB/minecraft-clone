@@ -78,18 +78,6 @@ freetype/config/ftheader.h
 KHR/khrplatform.h
 -
 
-.././inc/glm/./detail/setup.hpp
-cassert
--
-cstddef
--
-../simd/platform.h
-.././inc/glm/./simd/platform.h
-cstdint
--
-type_traits
--
-
 .././inc/glm/./detail/type_mat2x2.hpp
 type_vec2.hpp
 .././inc/glm/./detail/type_vec2.hpp
@@ -483,6 +471,10 @@ limits
 .././inc/glm/detail/_fixes.hpp
 cmath
 -
+
+.././inc/glm/detail/_noise.hpp
+../common.hpp
+.././inc/glm/common.hpp
 
 .././inc/glm/detail/_swizzle.hpp
 
@@ -1100,6 +1092,30 @@ matrix_transform.inl
 ../matrix.hpp
 .././inc/glm/matrix.hpp
 
+.././inc/glm/gtc/noise.hpp
+../detail/setup.hpp
+.././inc/glm/detail/setup.hpp
+../detail/qualifier.hpp
+.././inc/glm/detail/qualifier.hpp
+../detail/_noise.hpp
+.././inc/glm/detail/_noise.hpp
+../geometric.hpp
+.././inc/glm/geometric.hpp
+../common.hpp
+.././inc/glm/common.hpp
+../vector_relational.hpp
+.././inc/glm/vector_relational.hpp
+../vec2.hpp
+.././inc/glm/vec2.hpp
+../vec3.hpp
+.././inc/glm/vec3.hpp
+../vec4.hpp
+.././inc/glm/vec4.hpp
+noise.inl
+.././inc/glm/gtc/noise.inl
+
+.././inc/glm/gtc/noise.inl
+
 .././inc/glm/gtc/quaternion.hpp
 ../gtc/constants.hpp
 .././inc/glm/gtc/constants.hpp
@@ -1555,6 +1571,8 @@ glm/gtc/matrix_transform.hpp
 -
 glm/gtc/type_ptr.hpp
 -
+glm/gtc/noise.hpp
+-
 camera.h
 C:/Users/selim/Projet/0_Projets/Minecraft clone/src/camera.h
 shader.h
@@ -1573,4 +1591,8 @@ vertices.h
 C:/Users/selim/Projet/0_Projets/Minecraft clone/src/vertices.h
 scenes.h
 C:/Users/selim/Projet/0_Projets/Minecraft clone/src/scenes.h
+cstdlib
+-
+time.h
+-
 
