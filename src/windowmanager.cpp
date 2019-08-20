@@ -2,7 +2,7 @@
 
 int i = 0;
 extern bool g_debug;
-extern bool g_merge;
+
 Camera *WindowManager::camera2 = NULL;
 float WindowManager::lastX = LASTX;
 float WindowManager::lastY = LASTY;
@@ -142,12 +142,10 @@ void WindowManager::ProcessInput()
 			camera2->ProcessKeyboard(RIGHT, deltaTime);
 		if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
 		{
-			// *(int *)&DEBUG = !DEBUG;
 			g_debug = !g_debug;
 		}
 		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
 		{
-			g_merge = !g_merge;
 		}
 	}
 }
