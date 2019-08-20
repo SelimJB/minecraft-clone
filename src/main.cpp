@@ -20,8 +20,14 @@ using namespace std;
 GLuint VAOs[2], VBOs[2];
 GLuint vbo;
 const bool RAND = false;
-const bool DEBUG = true;
+const bool DEBUG = false;
 const bool MERGE = true;
+const bool OCCLUSION_CULLING = true;
+
+const bool EACH_FRAME = true;
+
+bool g_debug;
+bool g_merge;
 
 struct byte4
 {
@@ -30,9 +36,10 @@ struct byte4
 	byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w) : x(x), y(y), z(z), w(w) {}
 };
 
-const int CX = 90, CY = 30, CZ = 90;
+const int CX = 20, CY = 10, CZ = 20;
 uint8_t chunk[CX][CY][CZ];
-byte4 vertex[36 * CX * CY * CZ];
+byte4 vertex[18 * CX * CY * CZ];
+// byte4 vertex[18 * CX * CY * CZ];
 int vertexNbr;
 
 static float noise2d(float x, float y, int seed, int octaves, float persistence)
@@ -110,7 +117,7 @@ void noise(int seed)
 							h = (rand() & 0x3) + 3;
 							for (int i = 0; i < h; i++)
 								chunk[x][y + i][z] = 5;
-								// set(x, y + i, z, 5);
+							// set(x, y + i, z, 5);
 
 							// Leaves
 							for (int ix = -3; ix <= 3; ix++)
@@ -120,7 +127,7 @@ void noise(int seed)
 									for (int iz = -3; iz <= 3; iz++)
 									{
 										if (ix * ix + iy * iy + iz * iz < 8 + (rand() & 1) && !chunk[x + ix][y + h + iy][z + iz])
-										// if (ix * ix + iy * iy + iz * iz < 8 + (rand() & 1) && !get(x + ix, y + h + iy, z + iz))
+											// if (ix * ix + iy * iy + iz * iz < 8 + (rand() & 1) && !get(x + ix, y + h + iy, z + iz))
 											chunk[x + ix][y + h + iy][z + iz] = 4;
 									}
 								}
@@ -153,10 +160,6 @@ void noise(int seed)
 
 void randomChunkInitialisation()
 {
-	if (RAND)
-		srand(time(NULL));
-	else
-		srand(1);
 	for (int x = 0; x < CX; x++)
 	{
 		for (int y = 0; y < CY; y++)
@@ -181,13 +184,14 @@ void randomChunkInitialisation()
 	// chunk[3][3][6] = 0;
 }
 
-void update(Shader &shader, int &i)
+void updateChunk(Shader &shader, GLuint &vbo, int &i)
 {
 	// Vertex number
 	i = 0;
-	bool occlusionCulling = true;
+
 	// -x
 	bool vis = false;
+
 	for (int x = 0; x < CX; x++)
 	{
 		for (int y = 0; y < CY; y++)
@@ -209,9 +213,7 @@ void update(Shader &shader, int &i)
 					side = 2;
 				}
 
-				// bool vis = x == 0 || chunk[x - 1][y][z] == 0;
-				// eq else x != 0 && chunch[x - 1][y][z]
-				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis && MERGE)
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
 				{
 					vertex[i - 5] = byte4(x, y, z + 1, side);
 					vertex[i - 2] = byte4(x, y, z + 1, side);
@@ -219,16 +221,12 @@ void update(Shader &shader, int &i)
 				}
 				else
 				{
-					// if (!occlusionCulling || x == 0 || chunk[x - 1][y][z] == 0)
-					// {
-					// -x
 					vertex[i++] = byte4(x, y, z, side);
 					vertex[i++] = byte4(x, y, z + 1, side);
 					vertex[i++] = byte4(x, y + 1, z, side);
 					vertex[i++] = byte4(x, y + 1, z, side);
 					vertex[i++] = byte4(x, y, z + 1, side);
 					vertex[i++] = byte4(x, y + 1, z + 1, side);
-					// }
 				}
 				vis = true;
 			}
@@ -241,8 +239,6 @@ void update(Shader &shader, int &i)
 		{
 			for (int z = 0; z < CZ; z++)
 			{
-				// Empty Block
-				// Empty Block
 				if (chunk[x][y][z] == 0 || (chunk[x + 1][y][z] && x != CX - 1))
 				{
 					vis = false;
@@ -257,8 +253,7 @@ void update(Shader &shader, int &i)
 					side = 2;
 				}
 
-				// bool vis = x == CX - 1 || !chunk[x][y][z - 1];
-				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis && MERGE)
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
 				{
 					vertex[i - 4] = byte4(x + 1, y, z + 1, side);
 					vertex[i - 2] = byte4(x + 1, y + 1, z + 1, side);
@@ -266,8 +261,6 @@ void update(Shader &shader, int &i)
 				}
 				else
 				{
-					// if (!occlusionCulling || x == CX - 1 || chunk[x + 1][y][z] == 0)
-					// {
 					vertex[i++] = byte4(x + 1, y, z, side);
 					vertex[i++] = byte4(x + 1, y + 1, z, side);
 					vertex[i++] = byte4(x + 1, y, z + 1, side);
@@ -302,15 +295,7 @@ void update(Shader &shader, int &i)
 					side = 2;
 				}
 
-				// vis = y == 0;
-				// bool vis = true;
-				// bool vis = y == 0 || !chunk[x][y][z - 1];
-				// bool vis = !chunk[x][y][z - 1];
-				// bool vis = y != CY-1;
-				// bool vis = y == 0;
-				// bool vis = y == 0  || chunk[x][y-1][z] == 0;
-				// eq else x != 0 && chunch[x - 1][y][z]
-				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis && MERGE)
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
 				{
 					vertex[i - 4] = byte4(x, y, z + 1, side);
 					vertex[i - 2] = byte4(x + 1, y, z + 1, side);
@@ -318,15 +303,12 @@ void update(Shader &shader, int &i)
 				}
 				else
 				{
-					// if (!occlusionCulling || y == 0 || chunk[x][y - 1][z] == 0)
-					// {
 					vertex[i++] = byte4(x, y, z, side);
 					vertex[i++] = byte4(x + 1, y, z, side);
 					vertex[i++] = byte4(x, y, z + 1, side);
 					vertex[i++] = byte4(x + 1, y, z, side);
 					vertex[i++] = byte4(x + 1, y, z + 1, side);
 					vertex[i++] = byte4(x, y, z + 1, side);
-					// }
 				}
 				vis = true;
 			}
@@ -354,9 +336,7 @@ void update(Shader &shader, int &i)
 					side = 2;
 				}
 
-				// bool vis = y == CY - 1 || !chunk[x][y][z - 1];
-				// eq else x != 0 && chunch[x - 1][y][z]
-				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis && MERGE)
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
 				{
 					vertex[i - 5] = byte4(x, y + 1, z + 1, top);
 					vertex[i - 2] = byte4(x, y + 1, z + 1, top);
@@ -364,9 +344,6 @@ void update(Shader &shader, int &i)
 				}
 				else
 				{
-					// if (!occlusionCulling || y == CY - 1 || chunk[x][y + 1][z] == 0)
-					// {
-					// +y
 					vertex[i++] = byte4(x, y + 1, z, top);
 					vertex[i++] = byte4(x, y + 1, z + 1, top);
 					vertex[i++] = byte4(x + 1, y + 1, z, top);
@@ -401,7 +378,7 @@ void update(Shader &shader, int &i)
 					side = 2;
 				}
 
-				if (y != 0 && chunk[x][y][z] == chunk[x][y - 1][z] && vis && MERGE)
+				if (y != 0 && chunk[x][y][z] == chunk[x][y - 1][z] && vis)
 				{
 					vertex[i - 5] = byte4(x, y + 1, z, side);
 					vertex[i - 3] = byte4(x, y + 1, z, side);
@@ -409,8 +386,6 @@ void update(Shader &shader, int &i)
 				}
 				else
 				{
-					// if (!occlusionCulling || z == 0 || chunk[x][y][z - 1] == 0)
-					// {
 					// -z
 					vertex[i++] = byte4(x, y, z, side);
 					vertex[i++] = byte4(x, y + 1, z, side);
@@ -418,7 +393,6 @@ void update(Shader &shader, int &i)
 					vertex[i++] = byte4(x, y + 1, z, side);
 					vertex[i++] = byte4(x + 1, y + 1, z, side);
 					vertex[i++] = byte4(x + 1, y, z, side);
-					// }
 				}
 				vis = true;
 			}
@@ -431,8 +405,6 @@ void update(Shader &shader, int &i)
 		{
 			for (int y = 0; y < CY; y++)
 			{
-				// Empty Block
-				// Empty Block
 				if (chunk[x][y][z] == 0 || (chunk[x][y][z + 1] && z != CZ - 1))
 				{
 					vis = false;
@@ -455,16 +427,530 @@ void update(Shader &shader, int &i)
 				}
 				else
 				{
-					// if (!occlusionCulling || z == CZ - 1 || chunk[x][y][z + 1] == 0)
-					// {
-					// +z
 					vertex[i++] = byte4(x, y, z + 1, side);
 					vertex[i++] = byte4(x + 1, y, z + 1, side);
 					vertex[i++] = byte4(x, y + 1, z + 1, side);
 					vertex[i++] = byte4(x, y + 1, z + 1, side);
 					vertex[i++] = byte4(x + 1, y, z + 1, side);
 					vertex[i++] = byte4(x + 1, y + 1, z + 1, side);
+				}
+				vis = true;
+			}
+		}
+	}
+	int num = 71;
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+}
+
+void updateMergeEachFrameVAO(Shader &shader, GLuint &vbo, int &i)
+{
+	// Vertex number
+	i = 0;
+
+	// -x
+	bool vis = false;
+
+	for (int x = 0; x < CX; x++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int z = 0; z < CZ; z++)
+			{
+				// Empty Block
+				if (chunk[x][y][z] == 0 || (chunk[x - 1][y][z] && x != 0))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
+				{
+					vertex[i - 5] = byte4(x, y, z + 1, side);
+					vertex[i - 2] = byte4(x, y, z + 1, side);
+					vertex[i - 1] = byte4(x, y + 1, z + 1, side);
+				}
+				else
+				{
+					vertex[i++] = byte4(x, y, z, side);
+					vertex[i++] = byte4(x, y, z + 1, side);
+					vertex[i++] = byte4(x, y + 1, z, side);
+					vertex[i++] = byte4(x, y + 1, z, side);
+					vertex[i++] = byte4(x, y, z + 1, side);
+					vertex[i++] = byte4(x, y + 1, z + 1, side);
+				}
+				vis = true;
+			}
+		}
+	}
+	// +x
+	for (int x = 0; x < CX; x++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int z = 0; z < CZ; z++)
+			{
+				if (chunk[x][y][z] == 0 || (chunk[x + 1][y][z] && x != CX - 1))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
+				{
+					vertex[i - 4] = byte4(x + 1, y, z + 1, side);
+					vertex[i - 2] = byte4(x + 1, y + 1, z + 1, side);
+					vertex[i - 1] = byte4(x + 1, y, z + 1, side);
+				}
+				else
+				{
+					vertex[i++] = byte4(x + 1, y, z, side);
+					vertex[i++] = byte4(x + 1, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
+					vertex[i++] = byte4(x + 1, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y + 1, z + 1, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
 					// }
+				}
+				vis = true;
+			}
+		}
+	}
+	// -y
+	for (int x = 0; x < CX; x++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int z = 0; z < CZ; z++)
+			{
+				// Empty Block
+				if (chunk[x][y][z] == 0 || (chunk[x][y - 1][z] && y != 0))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
+				{
+					vertex[i - 4] = byte4(x, y, z + 1, side);
+					vertex[i - 2] = byte4(x + 1, y, z + 1, side);
+					vertex[i - 1] = byte4(x, y, z + 1, side);
+				}
+				else
+				{
+					vertex[i++] = byte4(x, y, z, side);
+					vertex[i++] = byte4(x + 1, y, z, side);
+					vertex[i++] = byte4(x, y, z + 1, side);
+					vertex[i++] = byte4(x + 1, y, z, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
+					vertex[i++] = byte4(x, y, z + 1, side);
+				}
+				vis = true;
+			}
+		}
+	}
+	// +y
+	for (int x = 0; x < CX; x++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int z = 0; z < CZ; z++)
+			{
+				// Empty Block
+				if (chunk[x][y][z] == 0 || (chunk[x][y + 1][z] && y != CY - 1))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
+				{
+					vertex[i - 5] = byte4(x, y + 1, z + 1, top);
+					vertex[i - 2] = byte4(x, y + 1, z + 1, top);
+					vertex[i - 1] = byte4(x + 1, y + 1, z + 1, top);
+				}
+				else
+				{
+					vertex[i++] = byte4(x, y + 1, z, top);
+					vertex[i++] = byte4(x, y + 1, z + 1, top);
+					vertex[i++] = byte4(x + 1, y + 1, z, top);
+					vertex[i++] = byte4(x + 1, y + 1, z, top);
+					vertex[i++] = byte4(x, y + 1, z + 1, top);
+					vertex[i++] = byte4(x + 1, y + 1, z + 1, top);
+					// }
+				}
+				vis = true;
+			}
+		}
+	}
+	// -z
+	for (int x = 0; x < CX; x++)
+	{
+		for (int z = CZ - 1; z >= 0; z--)
+		{
+			for (int y = 0; y < CY; y++)
+			{
+				// Empty Block
+				if (chunk[x][y][z] == 0 || (chunk[x][y][z - 1] && z != 0))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (y != 0 && chunk[x][y][z] == chunk[x][y - 1][z] && vis)
+				{
+					vertex[i - 5] = byte4(x, y + 1, z, side);
+					vertex[i - 3] = byte4(x, y + 1, z, side);
+					vertex[i - 2] = byte4(x + 1, y + 1, z, side);
+				}
+				else
+				{
+					// -z
+					vertex[i++] = byte4(x, y, z, side);
+					vertex[i++] = byte4(x, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y, z, side);
+					vertex[i++] = byte4(x, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y, z, side);
+				}
+				vis = true;
+			}
+		}
+	}
+	// + z
+	for (int x = 0; x < CX; x++)
+	{
+		for (int z = 0; z < CZ; z++)
+		{
+			for (int y = 0; y < CY; y++)
+			{
+				if (chunk[x][y][z] == 0 || (chunk[x][y][z + 1] && z != CZ - 1))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (y != 0 && chunk[x][y][z] == chunk[x][y - 1][z] && vis)
+				{
+					vertex[i - 4] = byte4(x, y + 1, z + 1, side);
+					vertex[i - 3] = byte4(x, y + 1, z + 1, side);
+					vertex[i - 1] = byte4(x + 1, y + 1, z + 1, side);
+				}
+				else
+				{
+					vertex[i++] = byte4(x, y, z + 1, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
+					vertex[i++] = byte4(x, y + 1, z + 1, side);
+					vertex[i++] = byte4(x, y + 1, z + 1, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
+					vertex[i++] = byte4(x + 1, y + 1, z + 1, side);
+				}
+				vis = true;
+			}
+		}
+	}
+	int num = 71;
+
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertex), vertex, GL_STATIC_DRAW);
+}
+
+void updateMerge(Shader &shader, int &i)
+{
+	// Vertex number
+	i = 0;
+	// -x
+	bool vis = false;
+	for (int x = 0; x < CX; x++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int z = 0; z < CZ; z++)
+			{
+				// Empty Block
+				if (chunk[x][y][z] == 0 || (chunk[x - 1][y][z] && x != 0))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
+				{
+					vertex[i - 5] = byte4(x, y, z + 1, side);
+					vertex[i - 2] = byte4(x, y, z + 1, side);
+					vertex[i - 1] = byte4(x, y + 1, z + 1, side);
+				}
+				else
+				{
+					vertex[i++] = byte4(x, y, z, side);
+					vertex[i++] = byte4(x, y, z + 1, side);
+					vertex[i++] = byte4(x, y + 1, z, side);
+					vertex[i++] = byte4(x, y + 1, z, side);
+					vertex[i++] = byte4(x, y, z + 1, side);
+					vertex[i++] = byte4(x, y + 1, z + 1, side);
+				}
+				vis = true;
+			}
+		}
+	}
+	// +x
+	for (int x = 0; x < CX; x++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int z = 0; z < CZ; z++)
+			{
+				if (chunk[x][y][z] == 0 || (chunk[x + 1][y][z] && x != CX - 1))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
+				{
+					vertex[i - 4] = byte4(x + 1, y, z + 1, side);
+					vertex[i - 2] = byte4(x + 1, y + 1, z + 1, side);
+					vertex[i - 1] = byte4(x + 1, y, z + 1, side);
+				}
+				else
+				{
+					vertex[i++] = byte4(x + 1, y, z, side);
+					vertex[i++] = byte4(x + 1, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
+					vertex[i++] = byte4(x + 1, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y + 1, z + 1, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
+					// }
+				}
+				vis = true;
+			}
+		}
+	}
+	// -y
+	for (int x = 0; x < CX; x++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int z = 0; z < CZ; z++)
+			{
+				// Empty Block
+				if (chunk[x][y][z] == 0 || (chunk[x][y - 1][z] && y != 0))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
+				{
+					vertex[i - 4] = byte4(x, y, z + 1, side);
+					vertex[i - 2] = byte4(x + 1, y, z + 1, side);
+					vertex[i - 1] = byte4(x, y, z + 1, side);
+				}
+				else
+				{
+					vertex[i++] = byte4(x, y, z, side);
+					vertex[i++] = byte4(x + 1, y, z, side);
+					vertex[i++] = byte4(x, y, z + 1, side);
+					vertex[i++] = byte4(x + 1, y, z, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
+					vertex[i++] = byte4(x, y, z + 1, side);
+				}
+				vis = true;
+			}
+		}
+	}
+	// +y
+	for (int x = 0; x < CX; x++)
+	{
+		for (int y = 0; y < CY; y++)
+		{
+			for (int z = 0; z < CZ; z++)
+			{
+				// Empty Block
+				if (chunk[x][y][z] == 0 || (chunk[x][y + 1][z] && y != CY - 1))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (z != 0 && chunk[x][y][z] == chunk[x][y][z - 1] && vis)
+				{
+					vertex[i - 5] = byte4(x, y + 1, z + 1, top);
+					vertex[i - 2] = byte4(x, y + 1, z + 1, top);
+					vertex[i - 1] = byte4(x + 1, y + 1, z + 1, top);
+				}
+				else
+				{
+					vertex[i++] = byte4(x, y + 1, z, top);
+					vertex[i++] = byte4(x, y + 1, z + 1, top);
+					vertex[i++] = byte4(x + 1, y + 1, z, top);
+					vertex[i++] = byte4(x + 1, y + 1, z, top);
+					vertex[i++] = byte4(x, y + 1, z + 1, top);
+					vertex[i++] = byte4(x + 1, y + 1, z + 1, top);
+					// }
+				}
+				vis = true;
+			}
+		}
+	}
+	// -z
+	for (int x = 0; x < CX; x++)
+	{
+		for (int z = CZ - 1; z >= 0; z--)
+		{
+			for (int y = 0; y < CY; y++)
+			{
+				// Empty Block
+				if (chunk[x][y][z] == 0 || (chunk[x][y][z - 1] && z != 0))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (y != 0 && chunk[x][y][z] == chunk[x][y - 1][z] && vis)
+				{
+					vertex[i - 5] = byte4(x, y + 1, z, side);
+					vertex[i - 3] = byte4(x, y + 1, z, side);
+					vertex[i - 2] = byte4(x + 1, y + 1, z, side);
+				}
+				else
+				{
+					// -z
+					vertex[i++] = byte4(x, y, z, side);
+					vertex[i++] = byte4(x, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y, z, side);
+					vertex[i++] = byte4(x, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y + 1, z, side);
+					vertex[i++] = byte4(x + 1, y, z, side);
+				}
+				vis = true;
+			}
+		}
+	}
+	// + z
+	for (int x = 0; x < CX; x++)
+	{
+		for (int z = 0; z < CZ; z++)
+		{
+			for (int y = 0; y < CY; y++)
+			{
+				if (chunk[x][y][z] == 0 || (chunk[x][y][z + 1] && z != CZ - 1))
+				{
+					vis = false;
+					continue;
+				}
+
+				int side = chunk[x][y][z];
+				int top = side;
+				if (side == 1)
+				{
+					top = 1;
+					side = 2;
+				}
+
+				if (y != 0 && chunk[x][y][z] == chunk[x][y - 1][z] && vis)
+				{
+					vertex[i - 4] = byte4(x, y + 1, z + 1, side);
+					vertex[i - 3] = byte4(x, y + 1, z + 1, side);
+					vertex[i - 1] = byte4(x + 1, y + 1, z + 1, side);
+				}
+				else
+				{
+					vertex[i++] = byte4(x, y, z + 1, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
+					vertex[i++] = byte4(x, y + 1, z + 1, side);
+					vertex[i++] = byte4(x, y + 1, z + 1, side);
+					vertex[i++] = byte4(x + 1, y, z + 1, side);
+					vertex[i++] = byte4(x + 1, y + 1, z + 1, side);
 				}
 				vis = true;
 			}
@@ -473,11 +959,10 @@ void update(Shader &shader, int &i)
 	int num = 71;
 }
 
-void update2(Shader &shader, int &i)
+void update(Shader &shader, int &i)
 {
 	// Vertex number
 	i = 0;
-	bool occlusionCulling = true;
 	for (int x = 0; x < CX; x++)
 	{
 		for (int y = 0; y < CY; y++)
@@ -497,7 +982,7 @@ void update2(Shader &shader, int &i)
 				}
 
 				// eq else x != 0 && chunch[x - 1][y][z]
-				if (!occlusionCulling || x == 0 || chunk[x - 1][y][z] == 0)
+				if (!OCCLUSION_CULLING || x == 0 || chunk[x - 1][y][z] == 0)
 				{
 					// -x
 					vertex[i++] = byte4(x, y, z, side);
@@ -508,7 +993,7 @@ void update2(Shader &shader, int &i)
 					vertex[i++] = byte4(x, y + 1, z + 1, side);
 				}
 
-				if (!occlusionCulling || x == CX - 1 || chunk[x + 1][y][z] == 0)
+				if (!OCCLUSION_CULLING || x == CX - 1 || chunk[x + 1][y][z] == 0)
 				{
 					// +x
 					vertex[i++] = byte4(x + 1, y, z, side);
@@ -518,7 +1003,7 @@ void update2(Shader &shader, int &i)
 					vertex[i++] = byte4(x + 1, y + 1, z + 1, side);
 					vertex[i++] = byte4(x + 1, y, z + 1, side);
 				}
-				if (!occlusionCulling || y == 0 || chunk[x][y - 1][z] == 0)
+				if (!OCCLUSION_CULLING || y == 0 || chunk[x][y - 1][z] == 0)
 				{
 					// -y
 					vertex[i++] = byte4(x, y, z, side);
@@ -528,7 +1013,7 @@ void update2(Shader &shader, int &i)
 					vertex[i++] = byte4(x + 1, y, z + 1, side);
 					vertex[i++] = byte4(x, y, z + 1, side);
 				}
-				if (!occlusionCulling || y == CY - 1 || chunk[x][y + 1][z] == 0)
+				if (!OCCLUSION_CULLING || y == CY - 1 || chunk[x][y + 1][z] == 0)
 				{
 					// +y
 					vertex[i++] = byte4(x, y + 1, z, top);
@@ -538,7 +1023,7 @@ void update2(Shader &shader, int &i)
 					vertex[i++] = byte4(x, y + 1, z + 1, top);
 					vertex[i++] = byte4(x + 1, y + 1, z + 1, top);
 				}
-				if (!occlusionCulling || z == 0 || chunk[x][y][z - 1] == 0)
+				if (!OCCLUSION_CULLING || z == 0 || chunk[x][y][z - 1] == 0)
 				{
 					// -z
 					vertex[i++] = byte4(x, y, z, side);
@@ -548,7 +1033,7 @@ void update2(Shader &shader, int &i)
 					vertex[i++] = byte4(x + 1, y + 1, z, side);
 					vertex[i++] = byte4(x + 1, y, z, side);
 				}
-				if (!occlusionCulling || z == CZ - 1 || chunk[x][y][z + 1] == 0)
+				if (!OCCLUSION_CULLING || z == CZ - 1 || chunk[x][y][z + 1] == 0)
 				{
 					// +z
 					vertex[i++] = byte4(x, y, z + 1, side);
@@ -566,9 +1051,16 @@ void update2(Shader &shader, int &i)
 
 int main()
 {
+	//
+	g_debug = DEBUG;
+	g_merge = MERGE;
+	if (RAND)
+		srand(time(NULL));
+	else
+		srand(1);
 	// GLFW : Initialize and configure
 	// -------------------------------
-	Camera camera(glm::vec3(0.0f, 4.0f, -5.0f));
+	Camera camera(glm::vec3(0.0f, 12.0f, -5.0f));
 	WindowManager window(camera);
 
 	// Load OpenGL function pointers
@@ -578,9 +1070,6 @@ int main()
 		std::cout << "Failed to initialize GLAD" << std::endl;
 		return -1;
 	}
-
-	// TEMP
-	glGenBuffers(1, &vbo);
 
 	// OPENGL occlusionCullingIONS
 	// --------------
@@ -609,8 +1098,19 @@ int main()
 	// vertexNbr = 0;
 	// randomChunkInitialisation();
 	noise(1);
-	update(blockShader, vertexNbr);
+	if (EACH_FRAME)
+	{
+		updateMergeEachFrameVAO(blockShader, vbo, vertexNbr);
+	}
+	else
+	{
+		if (g_merge && OCCLUSION_CULLING)
+			updateMerge(blockShader, vertexNbr);
+		else
+			update(blockShader, vertexNbr);
+	}
 	GLuint vao;
+	glGenBuffers(1, &vbo);
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
@@ -620,7 +1120,7 @@ int main()
 	// glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void *)0);
 	glEnableVertexAttribArray(0);
 	// glDrawArrays(GL_TRIANGLES, 0, 36);
-
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glGenBuffers(2, VBOs);
 	glGenVertexArrays(2, VAOs);
 	// Cubes VAO & VBO
@@ -665,7 +1165,7 @@ int main()
 		window.ProcessDeltaTime();
 		window.ProcessInput();
 
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(125.0f / 255.0f, 190.0f / 255.0f, 1.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		// TEMP
@@ -676,12 +1176,13 @@ int main()
 		blockShader.setMat4("view", view);
 		blockShader.setVec3("myColor", glm::vec3(1, 1, 0));
 		glm::mat4 model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-		model = glm::translate(model, glm::vec3(0, 0, 0));
+		model = glm::translate(model, glm::vec3(-5, 5, 0));
 		blockShader.setMat4("model", model);
+
+		if (EACH_FRAME)
+			updateMergeEachFrameVAO(blockShader, vbo, vertexNbr);
 		glBindVertexArray(vao);
-		update(blockShader, vertexNbr);
-		// i = 36 * CX * CY *CZ if only plain blocks
-		if (DEBUG)
+		if (g_debug)
 		{
 			glDrawArrays(GL_LINES, 0, vertexNbr);
 		}
@@ -691,18 +1192,18 @@ int main()
 		}
 
 		// draw3D(ourShader, camera, window, texture, texture2);
-		drawText(textRenderer, window);
+		textRenderer.RenderText("Framerate : " + to_string(window.AverageFrameRate()), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+		textRenderer.RenderText("Vrt nbr  :  " + to_string(vertexNbr), 35.0f, 70.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 		// cout << window.AverageFrameRate() << endl;
 		glfwSwapBuffers(window.GetWindow());
 		glfwPollEvents();
 	}
-
 	//
 	// ----
 	glDeleteVertexArrays(2, VAOs);
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(2, VBOs);
-	glDeleteBuffers(2, &vbo);
+	glDeleteBuffers(1, &vbo);
 
 	glfwTerminate();
 	return 0;

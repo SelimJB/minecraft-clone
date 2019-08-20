@@ -1,7 +1,8 @@
 #include "windowmanager.h"
 
 int i = 0;
-
+extern bool g_debug;
+extern bool g_merge;
 Camera *WindowManager::camera2 = NULL;
 float WindowManager::lastX = LASTX;
 float WindowManager::lastY = LASTY;
@@ -13,7 +14,7 @@ void WindowManager::ProcessDeltaTime()
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 	i++;
-	averageFrameRate = 1/(currentFrame/i);
+	averageFrameRate = 1 / (currentFrame / i);
 }
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
@@ -44,7 +45,7 @@ void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 	WindowManager::camera2->ProcessMouseScroll(yoffset);
 }
 
-static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
+static void cursor_position_callback(GLFWwindow *window, double xpos, double ypos)
 {
 	if (WindowManager::firstMouse)
 	{
@@ -139,5 +140,14 @@ void WindowManager::ProcessInput()
 			camera2->ProcessKeyboard(LEFT, deltaTime);
 		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
 			camera2->ProcessKeyboard(RIGHT, deltaTime);
+		if (glfwGetKey(window, GLFW_KEY_R) == GLFW_PRESS)
+		{
+			// *(int *)&DEBUG = !DEBUG;
+			g_debug = !g_debug;
+		}
+		if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS)
+		{
+			g_merge = !g_merge;
+		}
 	}
 }
