@@ -10,7 +10,7 @@ extern int vertexNbr;
 void drawText(TextRenderer &textRenderer, WindowManager &window)
 {
 	textRenderer.RenderText("Framerate : " + to_string(window.AverageFrameRate()), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-	textRenderer.RenderText("Vrt nbr  :  " + to_string(vertexNbr), 35.0f, 70.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
+	// textRenderer.RenderText("Vrt nbr  :  " + to_string(vertexNbr), 35.0f, 70.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 	textRenderer.RenderText("No mipmap, 2 textures, no culling", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
 }
 

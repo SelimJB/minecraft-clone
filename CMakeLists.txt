@@ -10,6 +10,7 @@ link_directories(./lib)
 
 set(SRCS
 ./src/main.cpp
+# ./src/test1.cpp
 ./src/glad.c
 ./src/textrenderer.cpp
 ./src/shader.cpp
