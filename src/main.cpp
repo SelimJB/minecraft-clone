@@ -36,7 +36,7 @@ struct byte4
 };
 
 const int CX = 16, CY = 16, CZ = 16;
-const int WCX = 32, WCY = 1, WCZ = 32;
+const int WCX = 1, WCY = 1, WCZ = 1;
 
 // uint8_t chunk[CX][CY][CZ];
 
@@ -47,13 +47,17 @@ class Chunk
 public:
 	void Update(Shader &shader);
 	void Noise(int seed);
+	time_t seed;
+	// TODO : ENLEVER
 	int vertexNbr;
+	Chunk *left, *right, *below, *above, *front, *back;
+
 	uint8_t blocks[CX][CY][CZ];
 	int cpX, cpY, cpZ;
 	GLuint vbo2, vao2;
 	bool updated = false;
 
-	Chunk(int x, int y, int z, int seed) : cpX(x), cpY(y), cpZ(z)
+	Chunk(int x, int y, int z, int s) : cpX(x), cpY(y), cpZ(z), seed(s)
 	{
 		// cout << "INITIALISATION" << endl;
 		memset(blocks, 0, sizeof blocks);
@@ -65,7 +69,7 @@ public:
 		glGenVertexArrays(1, &vao2);
 		glBindVertexArray(vao2);
 		glGenBuffers(1, &vbo2);
-		cout << "Configure VBO : " << vbo2 << endl;
+		// cout << "Configure VBO : " << vbo2 << endl;
 		glBindBuffer(GL_ARRAY_BUFFER, vbo2);
 		// Pas utile apparemment
 		glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STATIC_DRAW);
@@ -92,7 +96,7 @@ public:
 				Configure();
 				// cout << "\nUPDATED\t\t";
 				// cout << "\tVBO : " << vbo2 << "\t" << cpX << "\t" << cpY << "\t" << cpZ << endl;
-				Noise(time(NULL));
+				Noise(seed);
 				Update(shader);
 				// cout << vertexNbr << vbo2 << endl;
 			}
@@ -100,7 +104,7 @@ public:
 		if (updated)
 		{
 			glm::mat4 model = model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-			model = glm::translate(model, glm::vec3(cpX, cpY, cpZ));
+			model = glm::translate(model, glm::vec3(cpX*CX, cpY*CY, cpZ*CZ));
 			shader.setMat4("model", model);
 
 			// cout << "Draw VBO : " << vbo2 << endl;
@@ -127,16 +131,18 @@ public:
 	Shader shader;
 	World(Shader &s) : shader(s)
 	{
+		time_t seed = time(NULL);
 		for (int x = 0; x < WCX; x++)
 		{
-			for (int y = 0; y < WCY; y++)
+			for (int z = 0; z < WCZ; z++)
 			{
-				for (int z = 0; z < WCZ; z++)
+				for (int y = 0; y < WCY; y++)
 				{
-					w[x][y][z] = new Chunk(CX * x, -CY * y, CZ * z, time(NULL));
+					w[x][y][z] = new Chunk(x,-y,z, seed);
 				}
 			}
 		}
+		cout << seed << endl;
 	}
 	void Render()
 	{
@@ -145,12 +151,12 @@ public:
 		{
 			aze = 8;
 		}
+				for (int z = 0; z < WCZ; z++)
+				{
 		for (int x = 0; x < WCX; x++)
 		{
 			for (int y = 0; y < WCY; y++)
 			{
-				for (int z = 0; z < WCZ; z++)
-				{
 					w[x][y][z]->Draw(shader);
 				}
 			}
@@ -186,7 +192,7 @@ static float noise3d_abs(float x, float y, float z, int seed, int octaves, float
 	float sum = 0;
 	float strength = 1.0;
 	float scale = 1.0;
-
+	
 	for (int i = 0; i < octaves; i++)
 	{
 		sum += strength * fabs(glm::simplex(glm::vec3(x, y, z) * scale));
@@ -197,95 +203,9 @@ static float noise3d_abs(float x, float y, float z, int seed, int octaves, float
 	return sum;
 }
 
-void noise(int seed, uint8_t (&chunk)[CX][CY][CZ])
-{
-	// TEMPS
-	int ax = 0;
-	int az = 0;
-	int ay = 0;
-	int SEALEVEL = 4;
-	// if (noised)
-	// 	return;
-	// else
-	// 	noised = true;
-	for (int x = 0; x < CX; x++)
-	{
-		for (int z = 0; z < CZ; z++)
-		{
-			// Land height
-			float n = noise2d((x + ax * CX) / 256.0, (z + az * CZ) / 256.0, seed, 5, 0.8) * 4;
-			int h = n * 2;
-			int y = 0;
-
-			// Land blocks
-			for (y = 0; y < CY; y++)
-			{
-				// Are we above "ground" level?
-				if (y + ay * CY >= h)
-				{
-					// If we are not yet up to sea level, fill with water blocks
-					if (y + ay * CY < SEALEVEL)
-					{
-						chunk[x][y][z] = 8;
-						continue;
-						// Otherwise, we are in the air
-					}
-					else
-					{
-						// A tree!
-						if (chunk[x][y - 1][z] == 3 && (rand() & 0xff) == 0)
-						// if (get(x, y - 1, z) == 3 && (rand() & 0xff) == 0)
-						{
-							// Trunk
-							h = (rand() & 0x3) + 3;
-							for (int i = 0; i < h; i++)
-								chunk[x][y + i][z] = 5;
-							// set(x, y + i, z, 5);
-
-							// Leaves
-							for (int ix = -3; ix <= 3; ix++)
-							{
-								for (int iy = -3; iy <= 3; iy++)
-								{
-									for (int iz = -3; iz <= 3; iz++)
-									{
-										if (ix * ix + iy * iy + iz * iz < 8 + (rand() & 1) && !chunk[x + ix][y + h + iy][z + iz])
-											// if (ix * ix + iy * iy + iz * iz < 8 + (rand() & 1) && !get(x + ix, y + h + iy, z + iz))
-											chunk[x + ix][y + h + iy][z + iz] = 4;
-									}
-								}
-							}
-						}
-						break;
-					}
-				}
-
-				// Random value used to determine land type
-				float r = noise3d_abs((x + ax * CX) / 16.0, (y + ay * CY) / 16.0, (z + az * CZ) / 16.0, -seed, 2, 1);
-
-				// Sand layer
-				if (n + r * 5 < 4)
-					chunk[x][y][z] = 7;
-				// Dirt layer, but use grass blocks for the top
-				else if (n + r * 5 < 8)
-					chunk[x][y][z] = (h < SEALEVEL || y + ay * CY < h - 1) ? 1 : 3;
-				// Rock layer
-				else if (r < 1.25)
-					chunk[x][y][z] = 6;
-				// Sometimes, ores!
-				else
-					chunk[x][y][z] = 11;
-			}
-		}
-	}
-}
-
 void Chunk::Noise(int seed)
 {
 	// TEMPS
-	int ax = 0;
-	int az = 0;
-	int ay = 0;
 	int SEALEVEL = 4;
 	// if (noised)
 	// 	return;
@@ -296,7 +216,8 @@ void Chunk::Noise(int seed)
 		for (int z = 0; z < CZ; z++)
 		{
 			// Land height
-			float n = noise2d((x + ax * CX) / 256.0, (z + az * CZ) / 256.0, seed, 5, 0.8) * 4;
+			float n = noise2d((x + cpX * CX) / 256.0, (z + cpZ * CZ) / 256.0, seed, 5, 0.8) * 4;
+			// float n = noise2d((x + cpX * CX + seed % 256) / 512.0, (z + cpZ * CZ + seed % 256) / 512.0, seed, 5, 0.8) * 4;
 			int h = n * 2;
 			int y = 0;
 
@@ -304,10 +225,10 @@ void Chunk::Noise(int seed)
 			for (y = 0; y < CY; y++)
 			{
 				// Are we above "ground" level?
-				if (y + ay * CY >= h)
+				if (y + cpY * CY >= h)
 				{
 					// If we are not yet up to sea level, fill with water blocks
-					if (y + ay * CY < SEALEVEL)
+					if (y + cpY * CY < SEALEVEL)
 					{
 						blocks[x][y][z] = 8;
 						continue;
@@ -344,14 +265,14 @@ void Chunk::Noise(int seed)
 				}
 
 				// Random value used to determine land type
-				float r = noise3d_abs((x + ax * CX) / 16.0, (y + ay * CY) / 16.0, (z + az * CZ) / 16.0, -seed, 2, 1);
+				float r = noise3d_abs((x + cpX * CX + seed%16) / 16.0, (y + cpY * CY) / 16.0, (z + cpZ * CZ) / 16.0, -seed, 2, 1);
 
 				// Sand layer
 				if (n + r * 5 < 4)
 					blocks[x][y][z] = 7;
 				// Dirt layer, but use grass blocks for the top
 				else if (n + r * 5 < 8)
-					blocks[x][y][z] = (h < SEALEVEL || y + ay * CY < h - 1) ? 1 : 3;
+					blocks[x][y][z] = (h < SEALEVEL || y + cpY * CY < h - 1) ? 1 : 3;
 				// Rock layer
 				else if (r < 1.25)
 					blocks[x][y][z] = 6;
@@ -406,7 +327,7 @@ void Chunk::Update(Shader &shader)
 			for (int z = 0; z < CZ; z++)
 			{
 				// Empty Block
-				if (blocks[x][y][z] == 0 || (x != 0 && blocks[x - 1][y][z] ))
+				if (blocks[x][y][z] == 0 || (x != 0 && blocks[x - 1][y][z]))
 				{
 					vis = false;
 					continue;
@@ -571,7 +492,7 @@ void Chunk::Update(Shader &shader)
 			for (int y = 0; y < CY; y++)
 			{
 				// Empty Block
-				if (blocks[x][y][z] == 0 || (z != 0 && blocks[x][y][z - 1] ))
+				if (blocks[x][y][z] == 0 || (z != 0 && blocks[x][y][z - 1]))
 				{
 					vis = false;
 					continue;
@@ -612,7 +533,7 @@ void Chunk::Update(Shader &shader)
 		{
 			for (int y = 0; y < CY; y++)
 			{
-				if (blocks[x][y][z] == 0 || ( z != CZ - 1 && blocks[x][y][z + 1]))
+				if (blocks[x][y][z] == 0 || (z != CZ - 1 && blocks[x][y][z + 1]))
 				{
 					vis = false;
 					continue;
@@ -770,7 +691,7 @@ int main()
 	double delta = 0;
 	double last = 0;
 	double drawTime = 0;
-	bool fixFrameRate = false;
+	bool fixFrameRate = true;
 	// RENDER LOOP
 	// -----------
 	while (!glfwWindowShouldClose(window.GetWindow()))
