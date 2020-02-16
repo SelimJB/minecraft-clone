@@ -6,8 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 
-const unsigned int SCR_WIDTH = 800;
-const unsigned int SCR_HEIGHT = 600;
+const unsigned int SCR_WIDTH = 1000;
+const unsigned int SCR_HEIGHT = 750;
 
 // Camera parameters
 const bool CAMERA_CONTROL = true;
@@ -29,6 +29,7 @@ public:
 	GLFWwindow *GetWindow() { return window; }
 	void ProcessDeltaTime();
 	float DeltaTime() { return deltaTime; }
+	int GetBufferFrameRate(float refreshTime);
 	float AverageFrameRate() {return averageFrameRate; }
 	static Camera *camera2;
 	static float lastX;
@@ -45,6 +46,10 @@ private:
 	float lastFrame;
 	float deltaTime;
 	float averageFrameRate;
+	
+	float lastBufferedFramerateTime = 0;
+	int frameCount = 0;
+	int lastBufferedFramerate = 0;
 };
 
 #endif

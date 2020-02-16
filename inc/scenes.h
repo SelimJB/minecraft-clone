@@ -9,9 +9,9 @@ extern int vertexNbr;
 
 void drawText(TextRenderer &textRenderer, WindowManager &window)
 {
-	textRenderer.RenderText("Framerate : " + to_string(window.AverageFrameRate()), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-	// textRenderer.RenderText("Vrt nbr  :  " + to_string(vertexNbr), 35.0f, 70.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
-	textRenderer.RenderText("No mipmap, 2 textures, no culling", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
+	// textRenderer.RenderText("Framerate : " + to_string(window.GetBufferFrameRate(0.5f)), 25.0f, 20.0f, 1.0f, glm::vec3(0.8f, 0.4f, 0.4f));
+	// textRenderer.RenderText("Vrtx nbr  :  " + to_string(vertexNbr), 25.0f, 20.0f, 1.0f, glm::vec3(0.8f, 0.4f, 0.4f));
+	// textRenderer.RenderText("No mipmap, 2 textures, no culling", 540.0f, 570.0f, 0.5f, glm::vec3(0.3, 0.7f, 0.9f));
 }
 
 void twoTextures_noMipMap_noCulling_rotation(Shader &ourShader, Camera &camera, WindowManager &window, unsigned int texture, unsigned int texture2)
@@ -50,6 +50,36 @@ void twoTextures_noMipMap_noCulling_rotation(Shader &ourShader, Camera &camera, 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 	}
+}
+
+void testBlock(Shader &ourShader, Camera &camera, WindowManager &window, unsigned int texture, unsigned int texture2)
+{
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	// glActiveTexture(GL_TEXTURE1);
+
+	ourShader.use();
+
+	glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
+	ourShader.setMat4("projection", projection);
+	glm::mat4 view = camera.GetViewMatrix();
+	ourShader.setMat4("view", view);
+	glBindVertexArray(VAOs[0]);
+
+	// B1
+	glm::mat4 model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(-1, 0, 1));
+	// ourShader.setVec3("ourColor2", glm::vec3(1, 0.2f, 0.2f));
+	ourShader.setMat4("model", model);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
+
+	glBindTexture(GL_TEXTURE_2D, texture2);
+	// B2
+	model = glm::mat4(1.0f);
+	model = glm::translate(model, glm::vec3(1, 0, 1));
+	// ourShader.setVec3("ourColor2", glm::vec3(1, 0.2f, 0.2f));
+	ourShader.setMat4("model", model);
+	glDrawArrays(GL_TRIANGLES, 0, 36);
 }
 
 void oneTexture_noMipMap_noCulling_rotation(Shader &ourShader, Camera &camera, WindowManager &window, unsigned int texture, unsigned int texture2)
@@ -172,7 +202,34 @@ void draw3D(Shader &ourShader, Camera &camera, WindowManager &window, unsigned i
 	// oneTexture_noMipMap_noCulling_noRotation(ourShader, camera, window, texture, texture2); 		// 90
 	// oneTexture_noMipMap_noCulling_rotation(ourShader, camera, window, texture, texture2); 		// 49
 	// twoTextures_noMipMap_noCulling_rotation(ourShader, camera, window, texture, texture2);		// 45
-	testMipMap(ourShader, camera, window, texture, texture2); // 45
+	testBlock(ourShader, camera, window, texture, texture2); // 45
+}
+
+unsigned int buildTexture3(const char *texturePath)
+{
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	
+	// 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST); // Use GL_NEAREST_MIPMAP_LINEAR if you want to use mipmaps
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	int width, height, nrChannels;
+	unsigned char *data = stbi_load(texturePath, &width, &height, &nrChannels, 0);
+	if (data)
+	{
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+		glGenerateMipmap(GL_TEXTURE_2D);
+	}
+	else
+	{
+		std::cout << "Failed to load texture" << std::endl;
+	}
+	return texture;
 }
 
 unsigned int buildTexture(const char *texturePath)

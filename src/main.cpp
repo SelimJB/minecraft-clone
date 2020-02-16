@@ -36,7 +36,7 @@ struct byte4
 };
 
 const int CX = 16, CY = 16, CZ = 16;
-const int WCX = 1, WCY = 1, WCZ = 1;
+const int WCX = 48, WCY = 2, WCZ = 48;
 
 // uint8_t chunk[CX][CY][CZ];
 
@@ -104,7 +104,7 @@ public:
 		if (updated)
 		{
 			glm::mat4 model = model = glm::mat4(1.0f); // make sure to initialize matrix to identity matrix first
-			model = glm::translate(model, glm::vec3(cpX*CX, cpY*CY, cpZ*CZ));
+			model = glm::translate(model, glm::vec3(cpX * CX, cpY * CY, cpZ * CZ));
 			shader.setMat4("model", model);
 
 			// cout << "Draw VBO : " << vbo2 << endl;
@@ -138,7 +138,7 @@ public:
 			{
 				for (int y = 0; y < WCY; y++)
 				{
-					w[x][y][z] = new Chunk(x,-y,z, seed);
+					w[x][y][z] = new Chunk(x, -y, z, seed);
 				}
 			}
 		}
@@ -151,12 +151,12 @@ public:
 		{
 			aze = 8;
 		}
-				for (int z = 0; z < WCZ; z++)
-				{
-		for (int x = 0; x < WCX; x++)
+		for (int z = 0; z < WCZ; z++)
 		{
-			for (int y = 0; y < WCY; y++)
+			for (int x = 0; x < WCX; x++)
 			{
+				for (int y = 0; y < WCY; y++)
+				{
 					w[x][y][z]->Draw(shader);
 				}
 			}
@@ -192,7 +192,7 @@ static float noise3d_abs(float x, float y, float z, int seed, int octaves, float
 	float sum = 0;
 	float strength = 1.0;
 	float scale = 1.0;
-	
+
 	for (int i = 0; i < octaves; i++)
 	{
 		sum += strength * fabs(glm::simplex(glm::vec3(x, y, z) * scale));
@@ -265,7 +265,7 @@ void Chunk::Noise(int seed)
 				}
 
 				// Random value used to determine land type
-				float r = noise3d_abs((x + cpX * CX + seed%16) / 16.0, (y + cpY * CY) / 16.0, (z + cpZ * CZ) / 16.0, -seed, 2, 1);
+				float r = noise3d_abs((x + cpX * CX + seed % 16) / 16.0, (y + cpY * CY) / 16.0, (z + cpZ * CZ) / 16.0, -seed, 2, 1);
 
 				// Sand layer
 				if (n + r * 5 < 4)
@@ -335,10 +335,14 @@ void Chunk::Update(Shader &shader)
 
 				int side = blocks[x][y][z];
 				int top = side;
-				if (side == 1)
+				int bottom = side;
+				if (top == 3)
 				{
-					top = 1;
+					bottom = 1;
 					side = 2;
+				}
+				else if (top == 5){
+					top = bottom = 12;
 				}
 
 				if (z != 0 && blocks[x][y][z] == blocks[x][y][z - 1] && vis)
@@ -375,10 +379,14 @@ void Chunk::Update(Shader &shader)
 
 				int side = blocks[x][y][z];
 				int top = side;
-				if (side == 1)
+				int bottom = side;
+				if (top == 3)
 				{
-					top = 1;
+					bottom = 1;
 					side = 2;
+				}
+				else if (top == 5){
+					top = bottom = 12;
 				}
 
 				if (z != 0 && blocks[x][y][z] == blocks[x][y][z - 1] && vis)
@@ -417,26 +425,30 @@ void Chunk::Update(Shader &shader)
 
 				int side = blocks[x][y][z];
 				int top = side;
-				if (side == 1)
+				int bottom = side;
+				if (top == 3)
 				{
-					top = 1;
-					side = 2;
+					bottom = 1;
 				}
+				else if (top == 5){
+					top = bottom = 12;
+				}
+
 
 				if (z != 0 && blocks[x][y][z] == blocks[x][y][z - 1] && vis)
 				{
-					vertex[i - 4] = byte4(x, y, z + 1, side);
-					vertex[i - 2] = byte4(x + 1, y, z + 1, side);
-					vertex[i - 1] = byte4(x, y, z + 1, side);
+					vertex[i - 4] = byte4(x, y, z + 1, bottom+128);
+					vertex[i - 2] = byte4(x + 1, y, z + 1, bottom+128);
+					vertex[i - 1] = byte4(x, y, z + 1, bottom+128);
 				}
 				else
 				{
-					vertex[i++] = byte4(x, y, z, side);
-					vertex[i++] = byte4(x + 1, y, z, side);
-					vertex[i++] = byte4(x, y, z + 1, side);
-					vertex[i++] = byte4(x + 1, y, z, side);
-					vertex[i++] = byte4(x + 1, y, z + 1, side);
-					vertex[i++] = byte4(x, y, z + 1, side);
+					vertex[i++] = byte4(x, y, z, bottom+128);
+					vertex[i++] = byte4(x + 1, y, z, bottom+128);
+					vertex[i++] = byte4(x, y, z + 1, bottom+128);
+					vertex[i++] = byte4(x + 1, y, z, bottom+128);
+					vertex[i++] = byte4(x + 1, y, z + 1, bottom+128);
+					vertex[i++] = byte4(x, y, z + 1, bottom+128);
 				}
 				vis = true;
 			}
@@ -455,29 +467,31 @@ void Chunk::Update(Shader &shader)
 					vis = false;
 					continue;
 				}
-
 				int side = blocks[x][y][z];
 				int top = side;
-				if (side == 1)
+				int bottom = side;
+				if (top == 3)
 				{
-					top = 1;
-					side = 2;
+					bottom = 1;
+				}
+				else if (top == 5){
+					top = bottom = 12;
 				}
 
 				if (z != 0 && blocks[x][y][z] == blocks[x][y][z - 1] && vis)
 				{
-					vertex[i - 5] = byte4(x, y + 1, z + 1, top);
-					vertex[i - 2] = byte4(x, y + 1, z + 1, top);
-					vertex[i - 1] = byte4(x + 1, y + 1, z + 1, top);
+					vertex[i - 5] = byte4(x, y + 1, z + 1, top+128);
+					vertex[i - 2] = byte4(x, y + 1, z + 1, top+128);
+					vertex[i - 1] = byte4(x + 1, y + 1, z + 1, top+128);
 				}
 				else
 				{
-					vertex[i++] = byte4(x, y + 1, z, top);
-					vertex[i++] = byte4(x, y + 1, z + 1, top);
-					vertex[i++] = byte4(x + 1, y + 1, z, top);
-					vertex[i++] = byte4(x + 1, y + 1, z, top);
-					vertex[i++] = byte4(x, y + 1, z + 1, top);
-					vertex[i++] = byte4(x + 1, y + 1, z + 1, top);
+					vertex[i++] = byte4(x, y + 1, z, top+128);
+					vertex[i++] = byte4(x, y + 1, z + 1, top+128);
+					vertex[i++] = byte4(x + 1, y + 1, z, top+128);
+					vertex[i++] = byte4(x + 1, y + 1, z, top+128);
+					vertex[i++] = byte4(x, y + 1, z + 1, top+128);
+					vertex[i++] = byte4(x + 1, y + 1, z + 1, top+128);
 					// }
 				}
 				vis = true;
@@ -500,10 +514,14 @@ void Chunk::Update(Shader &shader)
 
 				int side = blocks[x][y][z];
 				int top = side;
-				if (side == 1)
+				int bottom = side;
+				if (top == 3)
 				{
-					top = 1;
+					bottom = 1;
 					side = 2;
+				}
+				else if (top == 5){
+					top = bottom = 12;
 				}
 
 				if (y != 0 && blocks[x][y][z] == blocks[x][y - 1][z] && vis)
@@ -541,11 +559,16 @@ void Chunk::Update(Shader &shader)
 
 				int side = blocks[x][y][z];
 				int top = side;
-				if (side == 1)
+				int bottom = side;
+				if (top == 3)
 				{
-					top = 1;
+					bottom = 1;
 					side = 2;
 				}
+				else if (top == 5){
+					top = bottom = 12;
+				}
+
 
 				if (y != 0 && blocks[x][y][z] == blocks[x][y - 1][z] && vis)
 				{
@@ -587,7 +610,8 @@ int main()
 		srand(1);
 	// GLFW : Initialize and configure
 	// -------------------------------
-	Camera camera(glm::vec3(0.0f, 12.0f, -5.0f));
+	Camera camera(glm::vec3(0.0f, 5.0f, -5.0f));
+	// Camera camera(glm::vec3(0.0f, 12.0f, -5.0f));
 	WindowManager window(camera);
 
 	// Load OpenGL function pointers
@@ -608,7 +632,7 @@ int main()
 
 	// SHADERS
 	// -------
-	Shader ourShader("./shaders/textureShader.vert", "./shaders/textureShader.frag");
+	Shader ourShader("./shaders/block3.vert", "./shaders/block3.frag");
 	Shader textShader("./shaders/textShader.vert", "./shaders/textShader.frag");
 	Shader blockShader("./shaders/block.vert", "./shaders/block.frag");
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(SCR_WIDTH), 0.0f, static_cast<GLfloat>(SCR_HEIGHT));
@@ -618,43 +642,43 @@ int main()
 	glUniform1i(glGetUniformLocation(ourShader.Program, "texture1"), 0);
 	ourShader.setInt("texture2", 1);
 
-	// // VBAs & VBOs
-	// // -----------
-	// //BOX
-	// // vertexNbr = 0;
-	// // randomChunkInitialisation();
-	// // updateMergeEachFrameVAO(blockShader, vbo, vertexNbr);
-	// glGenBuffers(1, &vbo);
-	// glGenVertexArrays(1, &vao);
-	// glBindVertexArray(vao);
-	// glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	// glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STATIC_DRAW);
-	// // glBufferData(GL_ARRAY_BUFFER, sizeof (vertices), vertices, GL_STATIC_DRAW);
-	// glVertexAttribPointer(0, 4, GL_BYTE, GL_FALSE, sizeof(byte4), (void *)0);
-	// // glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void *)0);
-	// glEnableVertexAttribArray(0);
-	// // glDrawArrays(GL_TRIANGLES, 0, 36);
-	// glBindBuffer(GL_ARRAY_BUFFER, 0);
-	// glGenBuffers(2, VBOs);
-	// glGenVertexArrays(2, VAOs);
-	// // Cubes VAO & VBO
-	// glBindVertexArray(VAOs[0]);
-	// glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
-	// glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	// glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
-	// glEnableVertexAttribArray(0);
-	// glVertexAttribPointer(1, 0, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-	// glEnableVertexAttribArray(1);
-	// glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
-	// glEnableVertexAttribArray(2);
-	// // Text VAO & VBO
-	// glBindVertexArray(VAOs[1]);
-	// glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
-	// glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
-	// glEnableVertexAttribArray(0);
-	// glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
-	// glBindBuffer(GL_ARRAY_BUFFER, 0);
-	// glBindVertexArray(0);
+	// VBAs & VBOs
+	// -----------
+	//BOX
+	// vertexNbr = 0;
+	// randomChunkInitialisation();
+	// updateMergeEachFrameVAO(blockShader, vbo, vertexNbr);
+	glGenBuffers(1, &vbo);
+	glGenVertexArrays(1, &vao);
+	glBindVertexArray(vao);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBufferData(GL_ARRAY_BUFFER, 0, NULL, GL_STATIC_DRAW);
+	// glBufferData(GL_ARRAY_BUFFER, sizeof (vertices), vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 4, GL_BYTE, GL_FALSE, sizeof(byte4), (void *)0);
+	// glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void *)0);
+	glEnableVertexAttribArray(0);
+	// glDrawArrays(GL_TRIANGLES, 0, 36);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glGenBuffers(2, VBOs);
+	glGenVertexArrays(2, VAOs);
+	// Cubes VAO & VBO
+	glBindVertexArray(VAOs[0]);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOs[0]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 0, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	// Text VAO & VBO
+	glBindVertexArray(VAOs[1]);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOs[1]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4, NULL, GL_DYNAMIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(GLfloat), 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
 
 	// // TEXT
 	// // ----
@@ -664,7 +688,9 @@ int main()
 	// // --------
 	// // texture 1
 	// unsigned int texture = buildTexture("textures/text1.jpg");
-	// unsigned texture2 = buildTexture2("textures/text2.png");
+	// unsigned int texture = buildTexture("textures/textures.png");
+	// unsigned int texture2 = buildTexture3("textures/text2.png");
+	unsigned int texture2 = buildTexture3("textures/textures.png");
 
 	// //
 	// // ----
@@ -686,7 +712,7 @@ int main()
 	// }
 
 	// Chunk toto4(0, 0, CZ, time(NULL));
-	World w(blockShader);
+	World w(ourShader);
 
 	double delta = 0;
 	double last = 0;
@@ -708,12 +734,14 @@ int main()
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 			// TEMP
-			blockShader.use();
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, texture2);
+			ourShader.use();
 			glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
-			blockShader.setMat4("projection", projection);
+			ourShader.setMat4("projection", projection);
 			glm::mat4 view = camera.GetViewMatrix();
-			blockShader.setMat4("view", view);
-			blockShader.setVec3("myColor", glm::vec3(1, 1, 0));
+			ourShader.setMat4("view", view);
+			// blockShader.setVec3("myColor", glm::vec3(1, 1, 0));
 
 			// toto.Draw(blockShader);
 			// toto1.Draw(blockShader);
@@ -730,7 +758,7 @@ int main()
 			// toto4.Draw(blockShader);
 
 			w.Render();
-
+			// draw3D(ourShader, camera, window, texture, texture2);
 			// textRenderer.RenderText("Framerate : " + to_string(window.AverageFrameRate()), 25.0f, 25.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 			// textRenderer.RenderText("Vrt nbr  :  " + to_string(vertexNbr), 35.0f, 70.0f, 1.0f, glm::vec3(0.5, 0.8f, 0.2f));
 

@@ -21,12 +21,12 @@ GLuint VAOs[2], VBOs[2];
 GLuint vbo;
 
 // TESTER SANS OCCLUSION PUIS A
-const bool RAND = true;
-const bool DEBUG = false;
+const bool RAND = false;
+const bool DEBUG = true;
 const bool MERGE = true;
 const bool OCCLUSION_CULLING = true;
 
-const bool EACH_FRAME = true;
+const bool EACH_FRAME = false;
 
 bool g_debug;
 bool g_merge;
@@ -38,8 +38,8 @@ struct byte4
 	byte4(uint8_t x, uint8_t y, uint8_t z, uint8_t w) : x(x), y(y), z(z), w(w) {}
 };
 
-const int CX = 16, CY = 16, CZ = 16;
-uint8_t chunk[CX][CY][CZ];
+const int CX = 4, CY = 4, CZ = 4;
+uint8_t chunk[CX][CY][CZ]	;
 byte4 vertex[36 * CX * CY * CZ];
 // byte4 vertex[18 * CX * CY * CZ];
 int vertexNbr;
@@ -169,14 +169,15 @@ void randomChunkInitialisation()
 			for (int z = 0; z < CZ; z++)
 			{
 				// int empty = 1;
-				int empty = rand() % 200;
+				int empty =  1 + rand() % 100 ;
 				// int water = 1;
-				int water = rand() % 20;
+				int water = 1 + rand() % 10;
 				// int rock = 1;
 				// int rock = rand() % 100;
-				int rock = rand() % 100;
+				int rock = 1 + rand() % 20;
+				int titi = 1 + rand() % 100;
 				// chunk[x][y][z] = 2;
-				chunk[x][y][z] = !empty ? 0 : !water ? 8 : !rock ? 7 : 2;
+				chunk[x][y][z] = !empty ? 0 : !water ? 8 : !rock ? 7 : !titi ? 5 : 2;
 				// chunk[x][y][z] = !empty ? 0 : y == 0 ? 2 : y == 2 ? 4 : 3;
 			}
 		}
@@ -1100,18 +1101,22 @@ int main()
 	// -----------
 	//BOX
 	// vertexNbr = 0;
-	// randomChunkInitialisation();
-	noise(time(NULL));
 	if (EACH_FRAME)
 	{
+		noise(time(NULL));
 		updateMergeEachFrameVAO(blockShader, vbo, vertexNbr);
 	}
 	else
 	{
-		if (g_merge && OCCLUSION_CULLING)
+		if (g_merge && OCCLUSION_CULLING){
+			// noise(time(NULL));
+			randomChunkInitialisation();
 			updateMerge(blockShader, vertexNbr);
-		else
+		}
+		else{
+			randomChunkInitialisation();
 			update(blockShader, vertexNbr);
+		}
 	}
 	GLuint vao;
 	glGenBuffers(1, &vbo);

@@ -17,6 +17,18 @@ void WindowManager::ProcessDeltaTime()
 	averageFrameRate = 1 / (currentFrame / i);
 }
 
+int WindowManager::GetBufferFrameRate(float refreshTime){
+	float currentFrame = glfwGetTime();
+	if (currentFrame > lastBufferedFramerateTime + refreshTime){
+		lastBufferedFramerateTime = currentFrame;
+		lastBufferedFramerate = frameCount;
+		frameCount =0;
+	}
+	frameCount++;
+	// std::cout << "  " << lastBufferedFramerate / refreshTime << std::endl;;
+	return lastBufferedFramerate / refreshTime;
+}
+
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
 	glViewport(0, 0, width, height);
