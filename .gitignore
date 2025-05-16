@@ -2,3 +2,7 @@ src/old
 README.txt
 misc
 *.exe
+*.o
+*.obj
+*.a
+resfile.*
